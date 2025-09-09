@@ -1,0 +1,90 @@
+########################################################
+##### Full network list for use in AlertMon filter #####
+########################################################
+
+AMPATH: 9
+ARE-ON: 131
+ARE-ON EXT: 452
+BTAA: 13
+CAAREN: 56
+CEN: 67
+OneNet DC: 52
+NOC Internal - CEN: 191
+NOC Service Desk: 732
+GNTC: 242
+GPN: 212
+NOC Internal: 7
+NOC Internal - I2: 342
+I-Light: 3
+GigaPOP: 14
+IU: 10
+I2: 352
+IRON: 772
+IU CNI: 28
+IUE: 31
+IUK: 33
+IUN: 34
+IUSB: 35
+IUS: 39
+IUPUC: 36
+KeystoneREN: 632
+Link Oregon: 461
+LONI: 48
+MAN LAN: 382
+NEAAR: 171
+NEREN: 322
+Networkmaine: 642
+OneNet: 53
+NOC Internal - OneNet: 64
+OSHEAN: 91
+SoX: 141
+TransPAC: 15
+RubinObs: 692
+WiX: 392
+
+
+##########################
+##### Current Access #####
+##########################
+
+Network               ID  Alertmon API Access
+AMPATH                9            1
+ARE-ON                131          0
+ARE-ON EXT            452          1
+BTAA                  13           1
+CAAREN                56           1
+CEN                   67           0
+OneNet DC             52           0
+NOC Internal - CEN    191          0
+NOC Service Desk      732          0
+GNTC                  242          1
+GPN                   212          1
+NOC Internal          7            1
+NOC Internal - I2     342          0
+I-Light               3            1
+GigaPOP               14           1
+IU                    10           1
+I2                    352          0
+IRON                  772          1
+IU CNI                28           1
+IUE                   31           1
+IUK                   33           1
+IUN                   34           1
+IUSB                  35           1
+IUS                   39           1
+IUPUC                 36           1
+KeystoneREN           632          1
+Link Oregon           461          1
+LONI                  48           1
+MAN LAN               382          0
+NEAAR                 171          1
+NEREN                 322          0
+Networkmaine          642          1
+OneNet                53           0
+NOC Internal - OneNet 64           0
+OSHEAN                91           0
+SoX                   141          1
+TransPAC              15           1
+RubinObs              692          1
+WiX                   392          0
+

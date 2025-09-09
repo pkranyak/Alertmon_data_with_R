@@ -1,0 +1,161 @@
+
+
+```{r code prep}
+
+pacman::p_load(dplyr, tidyr, purrr, tibble, httr, jsonlite, rstudioapi)
+
+```
+
+
+```{r set variables}
+
+# Set variables for the AlertMon query
+
+network_id <- 9
+start_time <- as.integer(as.POSIXct("2024-09-01 00:00:00", tz = "UTC"))
+end_time   <- as.integer(as.POSIXct("2025-01-31 23:59:59", tz = "UTC"))
+username <- "pkranyak"
+password <- askForPassword("Please enter your AlertMon API password")
+
+```
+
+
+```{r AlertMon query functions}
+
+#######################################
+### Function to query AlertMon data ###
+#######################################
+
+get_alerts_r <- function(username,
+                         password,
+                         network_id,
+                         start_time,
+                         end_time,
+                         limit = 1000,
+                         offset = 0) {
+  
+  body <- list(
+    method = "get_alerts",
+    network_id = network_id,
+    start_time_greater_equal = start_time,
+    start_time_less = end_time,
+    start_time_logic = "AND",
+    limit = limit,
+    offset = offset
+    )
+
+  res <- POST(
+    "https://alertmon-stage.grnoc.iu.edu/alertmon2/webservice-basic/alertmon.cgi",
+    authenticate(username, password, type = "basic"),
+    body = body,
+    encode = "form",
+    verbose()
+    )
+  
+  stop_for_status(res)
+  
+  content(res, "parsed", simplifyVector = TRUE)
+}
+
+#####################################################################
+### Function to loop through pages for queries larger than 1,000 rows
+#####################################################################
+
+get_all_alerts <- function(username,
+                           password,
+                           network_id,
+                           start_time,
+                           end_time,
+                           limit = 1000) {
+  
+  offset <- 0
+  all_results <- list()
+  page <- 1
+  
+  repeat {
+    res <- get_alerts_r(username, password, network_id, start_time, end_time,
+                        limit = limit, offset = offset)
+    
+    # check if there are results
+    if (is.null(res$results) || nrow(res$results) == 0) {
+      message("No more results returned. Stopping loop.")
+      break
+    }
+    
+    all_results <- append(all_results, list(res$results))
+    
+    # progress message
+    message(sprintf("Fetched page %d: rows %d–%d",
+                    page,
+                    offset + 1,
+                    offset + nrow(res$results)))
+    
+    # stop if this page has fewer rows than the limit → means last page
+    if (nrow(res$results) < limit) break
+    
+    # increment offset and page counter
+    offset <- offset + limit
+    page <- page + 1
+  }
+  
+  bind_rows(all_results)
+}
+
+######################################
+### Function to tidy AlertMon data ###
+######################################
+
+tidy_alerts <- function(alerts_results) {
+  alerts_results %>%
+    as_tibble() %>%
+    mutate(across(where(is.data.frame), ~map(., as_tibble))) %>%
+#    unnest_wider(network_profiles, names_sep = "_") %>%                        # Skipping for now...
+#    unnest_wider(flaps, names_sep = "_") %>%
+    mutate(across(any_of(c("start_time", "end_time", "date_added", "last_updated")),
+                  ~ as.POSIXct(as.numeric(.),
+                               origin = "1970-01-01",
+                               tz = "UTC"))) %>%
+    select(where(~!all(is.na(.))))
+  }
+
+```
+
+
+```{r AlertMon query one network}
+
+alerts_raw <- get_all_alerts(username, password, network_id, start_time, end_time)
+
+alerts_df <- tidy_alerts(alerts_raw)
+
+```
+
+
+```{r Alertmon query network loop}
+
+# Set list of networks to query
+network_list <- c(9, 13, 56, 14)
+
+# Loop across networks with pagination
+all_alerts_df <- map_dfr(
+  network_list,
+  function(net_id) {
+    message("Fetching alerts for network ", net_id, "...")
+    
+    alerts_all <- get_all_alerts(username,
+                                 password,
+                                 network_id = net_id,
+                                 start_time = start_time,
+                                 end_time = end_time,
+                                 limit = 1000)
+    
+    if (!is.null(alerts_all) && nrow(alerts_all) > 0) {
+      tidy_alerts(alerts_all) %>%
+        mutate(network_id = net_id)   # keep track of which network it came from
+      } else {
+      tibble(network_id = net_id, status = "No data")
+      }
+    }
+  )
+
+```
+
