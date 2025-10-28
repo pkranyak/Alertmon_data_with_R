@@ -2,7 +2,7 @@
 
 ```{r code prep}
 
-pacman::p_load(dplyr, tidyr, purrr, tibble, httr, jsonlite, rstudioapi)
+pacman::p_load(dplyr, readr, tidyr, purrr, tibble, httr, jsonlite, rstudioapi)
 
 ```
 
@@ -11,8 +11,11 @@ pacman::p_load(dplyr, tidyr, purrr, tibble, httr, jsonlite, rstudioapi)
 
 # Set variables for the AlertMon query
 
-network_id <- 9
-start_time <- as.integer(as.POSIXct("2024-09-01 00:00:00", tz = "UTC"))
+## Set either a single network or a list
+network_id <- 52
+network_list <- c(52, 191, 732)
+## Other variables to set
+start_time <- as.integer(as.POSIXct("2024-12-01 00:00:00", tz = "UTC"))
 end_time   <- as.integer(as.POSIXct("2025-01-31 23:59:59", tz = "UTC"))
 username <- "pkranyak"
 password <- askForPassword("Please enter your AlertMon API password")
@@ -77,7 +80,7 @@ get_all_alerts <- function(username,
                         limit = limit, offset = offset)
     
     # check if there are results
-    if (is.null(res$results) || nrow(res$results) == 0) {
+    if (is.null(res$results) || !is.data.frame(res$results) || nrow(res$results) == 0) {
       message("No more results returned. Stopping loop.")
       break
     }
@@ -109,9 +112,13 @@ tidy_alerts <- function(alerts_results) {
   alerts_results %>%
     as_tibble() %>%
     mutate(across(where(is.data.frame), ~map(., as_tibble))) %>%
-#    unnest_wider(network_profiles, names_sep = "_") %>%                        # Skipping for now...
-#    unnest_wider(flaps, names_sep = "_") %>%
-    mutate(across(any_of(c("start_time", "end_time", "date_added", "last_updated")),
+    # unnest_wider(network_profiles, names_sep = "_") %>%                        # Skipping for now...
+    # unnest_wider(flaps, names_sep = "_") %>%
+    mutate(across(any_of(c("start_time",
+                           "end_time",
+                           "date_added",
+                           "last_updated",
+                           "acknowledgement_date_added")),
                   ~ as.POSIXct(as.numeric(.),
                                origin = "1970-01-01",
                                tz = "UTC"))) %>%
@@ -123,17 +130,19 @@ tidy_alerts <- function(alerts_results) {
 
 ```{r AlertMon query one network}
 
-alerts_raw <- get_all_alerts(username, password, network_id, start_time, end_time)
+# convenience - delete later
+network_id <- 732
 
-alerts_df <- tidy_alerts(alerts_raw)
+alerts_df <- get_all_alerts(username, password, network_id, start_time, end_time) %>%
+  tidy_alerts()
 
 ```
 
 
 ```{r Alertmon query network loop}
 
-# Set list of networks to query
-network_list <- c(9, 13, 56, 14)
+# convenience - delete later
+network_list <- c(53, 64, 91)
 
 # Loop across networks with pagination
 all_alerts_df <- map_dfr(
@@ -158,4 +167,26 @@ all_alerts_df <- map_dfr(
   )
 
 ```
+
+
+```{r write results to csv}
+
+# Set a file name for the report
+file_name <- "AMPATH_2024_09_01-2025_01_31"
+
+# Write file based on which report was pulled
+if (exists("alerts_df")) {
+  write_csv(alerts_df,
+            paste0("/Users/pkranyak/Desktop/GitHub/Alertmon_data_with_R/Reports/",
+                   file_name,
+                   ".csv"))
+} else if (exists("all_alerts_df")) {
+  write_csv(all_alerts_df,
+            paste0("/Users/pkranyak/Desktop/GitHub/Alertmon_data_with_R/Reports/",
+                   file_name,
+                   ".csv"))
+}
+
+```
+
 

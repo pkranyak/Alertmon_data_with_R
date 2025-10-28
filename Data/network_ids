@@ -49,22 +49,22 @@ WiX: 392
 
 Network               ID  Alertmon API Access
 AMPATH                9            1
-ARE-ON                131          0
+ARE-ON                131          1
 ARE-ON EXT            452          1
 BTAA                  13           1
 CAAREN                56           1
-CEN                   67           0
-OneNet DC             52           0
-NOC Internal - CEN    191          0
-NOC Service Desk      732          0
+CEN                   67           1
+OneNet DC             52           1
+NOC Internal - CEN    191          1
+NOC Service Desk      732          ACCESS DENIED
 GNTC                  242          1
 GPN                   212          1
 NOC Internal          7            1
-NOC Internal - I2     342          0
+NOC Internal - I2     342          1
 I-Light               3            1
 GigaPOP               14           1
 IU                    10           1
-I2                    352          0
+I2                    352          1
 IRON                  772          1
 IU CNI                28           1
 IUE                   31           1
@@ -76,15 +76,15 @@ IUPUC                 36           1
 KeystoneREN           632          1
 Link Oregon           461          1
 LONI                  48           1
-MAN LAN               382          0
+MAN LAN               382          1
 NEAAR                 171          1
-NEREN                 322          0
+NEREN                 322          1
 Networkmaine          642          1
-OneNet                53           0
-NOC Internal - OneNet 64           0
-OSHEAN                91           0
+OneNet                53           1
+NOC Internal - OneNet 64           1
+OSHEAN                91           1
 SoX                   141          1
 TransPAC              15           1
 RubinObs              692          1
-WiX                   392          0
+WiX                   392          1
 
