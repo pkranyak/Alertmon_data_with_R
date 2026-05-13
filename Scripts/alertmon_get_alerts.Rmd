@@ -12,11 +12,11 @@ pacman::p_load(dplyr, readr, tidyr, purrr, tibble, httr, jsonlite, rstudioapi)
 # Set variables for the AlertMon query
 
 ## Set either a single network or a list
-network_id <- 52
-network_list <- c(52, 191, 732)
+network_id <- 202
+network_list <- c(3, 242, 212, 7, 10)
 ## Other variables to set
-start_time <- as.integer(as.POSIXct("2024-12-01 00:00:00", tz = "UTC"))
-end_time   <- as.integer(as.POSIXct("2025-01-31 23:59:59", tz = "UTC"))
+start_time <- as.integer(as.POSIXct("2025-05-01 00:00:00", tz = "UTC"))
+end_time   <- as.integer(as.POSIXct("2025-06-01 00:00:00", tz = "UTC"))
 username <- "pkranyak"
 password <- askForPassword("Please enter your AlertMon API password")
 
@@ -130,9 +130,6 @@ tidy_alerts <- function(alerts_results) {
 
 ```{r AlertMon query one network}
 
-# convenience - delete later
-network_id <- 732
-
 alerts_df <- get_all_alerts(username, password, network_id, start_time, end_time) %>%
   tidy_alerts()
 
@@ -140,9 +137,6 @@ alerts_df <- get_all_alerts(username, password, network_id, start_time, end_time
 
 
 ```{r Alertmon query network loop}
-
-# convenience - delete later
-network_list <- c(53, 64, 91)
 
 # Loop across networks with pagination
 all_alerts_df <- map_dfr(
@@ -172,7 +166,7 @@ all_alerts_df <- map_dfr(
 ```{r write results to csv}
 
 # Set a file name for the report
-file_name <- "AMPATH_2024_09_01-2025_01_31"
+file_name <- "OmniSOC_2025_05_01-2025_05_31"
 
 # Write file based on which report was pulled
 if (exists("alerts_df")) {
